@@ -12,26 +12,20 @@
 }:
 buildGoModule rec {
   pname = "mgmt";
-  version = "unstable-2022-10-24";
+  version = "1.0.0";
 
   src = fetchFromGitHub {
     owner = "purpleidea";
     repo = "mgmt";
-    rev = "d8820fa1855668d9e0f7a7829d9dd0d122b2c5a9";
-    hash = "sha256-jurZvEtiaTjWeDkmCJDIFlTzR5EVglfoDxkFgOilo8s=";
+    rev = "307660e9bceebe4c6b6bb9676e8f7e6427e24c36";
+    hash = "sha256-jrcborN5JZwXAs18ntDxvWVpnL+SmL6bAH4VPcqJI3w=";
   };
 
-  # patching must be done in prebuild, so it is shared with goModules
-  # see https://github.com/NixOS/nixpkgs/issues/208036
-  preBuild = ''
-    for file in `find -name Makefile -type f`; do
-      substituteInPlace $file --replace "/usr/bin/env " ""
-    done
-
-    substituteInPlace lang/types/Makefile \
-      --replace "unset GOCACHE && " ""
+  postPatch = ''
     patchShebangs misc/header.sh
-    make lang funcgen
+  '';
+  preBuild = ''
+    make lang resources funcgen
   '';
 
   buildInputs = [
@@ -50,13 +44,13 @@ buildGoModule rec {
   ldflags = [
     "-s"
     "-w"
-    "-X main.program=mgmt"
+    "-X main.program=${pname}"
     "-X main.version=${version}"
   ];
 
   subPackages = [ "." ];
 
-  vendorHash = "sha256-Dtqy4TILN+7JXiHKHDdjzRTsT8jZYG5sPudxhd8znXY=";
+  vendorHash = "sha256-XZTDqN5nQqze41Y/jOhT3mFHXeR2oPjXpz7CJuPOi8k=";
 
   meta = with lib; {
     description = "Next generation distributed, event-driven, parallel config management";
